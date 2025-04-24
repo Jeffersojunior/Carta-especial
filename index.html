@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carta Especial</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            overflow: hidden;
+        }
+        .envelope {
+            width: 300px;
+            height: 200px;
+            background: linear-gradient(145deg, #ff9999, #ff6666);
+            position: relative;
+            cursor: pointer;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        .envelope:hover {
+            transform: scale(1.05) rotate(2deg);
+        }
+        .heart {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px;
+            color: #ff0000;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        .message {
+            position: absolute;
+            width: 280px;
+            height: 180px;
+            background: linear-gradient(to bottom, #ffffff, #f9f9f9);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.1);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.5s, transform 0.7s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        .envelope.open .message {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        }
+        .envelope.open {
+            transform: scale(1.2) rotate(5deg);
+            background: linear-gradient(145deg, #ffcccc, #ff9999);
+        }
+        .envelope.open .heart {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        /* Confetes */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+            z-index: 1;
+        }
+        
+        .emoji-animation {
+            display: inline-block;
+            animation: bounce 0.8s ease infinite alternate;
+        }
+        
+        @keyframes bounce {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.3); }
+        }
+    </style>
+</head>
+<body>
+    <div class="envelope" id="envelope" onclick="openEnvelope()">
+        <div class="heart">❤️</div>
+        <div class="message" id="message">vai se foder <span class="emoji-animation">❤️</span></div>
+    </div>
+
+    <script>
+        function openEnvelope() {
+            const envelope = document.getElementById('envelope');
+            envelope.classList.toggle('open');
+            
+            if (envelope.classList.contains('open')) {
+                createConfetti();
+                playPopSound();
+            }
+        }
+        
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            const shapes = ['circle', 'square', 'triangle'];
+            
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                // Estilo aleatório para cada confete
+                const size = Math.random() * 8 + 5;
+                const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
+                confetti.style.backgroundColor = color;
+                
+                if (shape === 'circle') {
+                    confetti.style.borderRadius = '50%';
+                } else if (shape === 'triangle') {
+                    confetti.style.width = '0';
+                    confetti.style.height = '0';
+                    confetti.style.backgroundColor = 'transparent';
+                    confetti.style.borderLeft = `${size}px solid transparent`;
+                    confetti.style.borderRight = `${size}px solid transparent`;
+                    confetti.style.borderBottom = `${size}px solid ${color}`;
+                }
+                
+                // Posição inicial (centro da carta)
+                confetti.style.left = '50%';
+                confetti.style.top = '50%';
+                
+                document.body.appendChild(confetti);
+                
+                // Animação
+                const angle = Math.random() * 360;
+                const distance = 50 + Math.random() * 300;
+                const duration = 1 + Math.random() * 3;
+                
+                confetti.style.transform = 'translate(-50%, -50%)';
+                
+                setTimeout(() => {
+                    confetti.style.opacity = '1';
+                    confetti.style.transform = `translate(
+                        calc(-50% + ${distance * Math.cos(angle * Math.PI/180)}px), 
+                        calc(-50% + ${distance * Math.sin(angle * Math.PI/180)}px)
+                    ) rotate(${Math.random() * 360}deg)`;
+                    confetti.style.transition = `transform ${duration}s cubic-bezier(0.11, 0.72, 0.24, 1.02), opacity ${duration/3}s`;
+                    
+                    setTimeout(() => {
+                        confetti.style.opacity = '0';
+                        setTimeout(() => {
+                            confetti.remove();
+                        }, duration * 300);
+                    }, duration * 700);
+                }, 10);
+            }
+        }
+        
+        function playPopSound() {
+            // Criar um som de "pop" simples
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(520, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(
+                    200, audioContext.currentTime + 0.3
+                );
+                
+                gainNode.gain.setValueAtTime(1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(
+                    0.01, audioContext.currentTime + 0.3
+                );
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) {
+                // Se não conseguir reproduzir o som, apenas continue sem ele
+                console.log("Áudio não suportado");
+            }
+        }
+    </script>
+</body>
+</html>
